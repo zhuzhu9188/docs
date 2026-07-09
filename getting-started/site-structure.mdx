@@ -1,0 +1,271 @@
+---
+title: "网站结构规划：打好架构基础决定长期成败"
+sidebarTitle: "网站结构"
+description: "合理的网站架构影响SEO排名、用户体验和后期维护。本文介绍URL设计、导航规划、Sitemap配置等核心架构要素。"
+---
+
+很多人建站时把大量时间花在挑模板、调颜色上，却忽视了一件更重要的事：网站结构。架构规划得好，搜索引擎爬虫能高效抓取你的内容，用户能快速找到想要的信息，日后增加栏目或迁移内容也不会一团乱麻。架构规划得差，即使设计再漂亮，SEO 和用户体验也会从根基处受损。这篇文章带你系统地想清楚网站的骨架应该长什么样。
+
+## 为什么架构比设计更重要
+
+设计是表皮，架构是骨骼。以下三个维度说明架构的优先级：
+
+<CardGroup cols={3}>
+  <Card title="影响 SEO 排名" icon="magnifying-glass">
+    搜索引擎通过链接结构判断页面的重要程度。层级清晰的架构让权重从首页向下合理分配，关键页面获得更多"链接权重"，排名潜力更强。
+  </Card>
+  <Card title="决定用户体验" icon="user">
+    用户在网站中能否快速找到目标内容，取决于信息架构是否合理。导航混乱、层级太深会导致跳出率上升，转化率下降。
+  </Card>
+  <Card title="影响后期维护" icon="wrench">
+    一个清晰的结构让你在添加新内容时知道放在哪里。反之，结构模糊的网站随着内容增多会越来越难以管理，最终不得不推倒重来。
+  </Card>
+</CardGroup>
+
+## 扁平化 vs 深层级结构
+
+网站层级深度直接影响 SEO 和用户体验。核心原则是：**任何页面距离首页的点击次数不应超过 3 次**。
+
+<Tabs>
+  <Tab title="扁平化结构（推荐）">
+    ```
+    首页
+    ├── 分类页 A
+    │   ├── 内容页 A-1
+    │   └── 内容页 A-2
+    ├── 分类页 B
+    │   ├── 内容页 B-1
+    │   └── 内容页 B-2
+    └── 关于页
+    ```
+
+    **优点**：
+    - 爬虫可以用更少的抓取预算覆盖全站
+    - 用户从首页到任意内容页最多 2 次点击
+    - 链接权重传导路径短，内容页排名潜力更强
+
+    **适合**：博客、产品站、小型企业官网、内容数量在数百页以内的站点
+  </Tab>
+  <Tab title="深层级结构（谨慎使用）">
+    ```
+    首页
+    └── 大类
+        └── 中类
+            └── 小类
+                └── 内容页
+    ```
+
+    **问题**：
+    - 内容页距首页 4 次以上点击，爬虫抓取优先级低
+    - 链接权重被多层稀释，深层页面难以获得排名
+    - 用户迷失在层级中，导航体验差
+
+    **仅适合**：商品 SKU 数量极多的大型电商（如数万个产品），此时深层级是组织内容的必要手段，需配合强大的站内搜索和面包屑导航。
+  </Tab>
+</Tabs>
+
+## URL 结构设计原则
+
+URL 是用户和搜索引擎理解页面内容的第一个信号。好的 URL 简洁、语义明确、可预测。
+
+<CardGroup cols={2}>
+  <Card title="✅ 好的 URL 示例" icon="circle-check">
+    ```
+    yourdomain.com/blog/seo-guide
+    yourdomain.com/products/running-shoes
+    yourdomain.com/about
+    yourdomain.com/blog/2024/keyword-research
+    ```
+    - 全小写，用连字符分隔单词
+    - 包含目标关键词
+    - 层级与网站结构一致
+    - 去掉无意义的停用词
+  </Card>
+  <Card title="❌ 需要避免的 URL" icon="circle-xmark">
+    ```
+    yourdomain.com/p?id=1234
+    yourdomain.com/category/sub/post/title
+    yourdomain.com/SEO_Guide_2024_Final_v2
+    yourdomain.com/index.php?page=about&lang=zh
+    ```
+    - 带动态参数（`?id=`）的 URL 不可读
+    - 层级过深（超过 3 层目录）
+    - 下划线代替连字符
+    - 大小写混用或含版本号
+  </Card>
+</CardGroup>
+
+<Note>
+中文 URL 在技术上可行，但不推荐用于 SEO。中文字符在传播时会被编码为 `%E4%B8%AD%E6%96%87` 这样的形式，不仅难以识别，分享时也容易断链。建议 URL 始终使用英文或拼音，页面标题和正文使用中文。
+</Note>
+
+## 三类核心页面的职责划分
+
+一个健康的网站内容体系，通常由以下三类页面构成，各司其职：
+
+<Accordion title="首页：品牌入口，流量枢纽">
+首页是全站权重最高的页面，承担两个核心任务：
+
+1. **清晰传达你是谁、能提供什么价值**，让用户在 5 秒内判断是否要继续浏览
+2. **将流量引导至最重要的分类页或内容页**，通过导航和页面内链接向下分发权重
+
+首页不应该是内容的终点，而是流量的起点。避免把所有内容都堆在首页——这会稀释权重，也让用户无从下手。
+</Accordion>
+
+<Accordion title="分类页：主题聚合，SEO 中间层">
+分类页（也叫"类目页"或"支柱页面"）承接首页的流量，并将其分发给具体内容页。
+
+**好的分类页应该**：
+- 针对一个宽泛但有搜索量的主题关键词进行优化（如"SEO 入门"、"跑步装备"）
+- 包含该主题的概述性内容，而不只是一个内容列表
+- 通过内链将相关内容页串联起来，形成主题聚合效应
+
+分类页是建立"主题权威性"（Topical Authority）的关键所在。
+</Accordion>
+
+<Accordion title="内容页：深度覆盖，长尾流量">
+内容页（博客文章、产品详情页、服务说明页）是流量的最终落点。
+
+**设计原则**：
+- 每个内容页只专注一个具体问题或关键词
+- 在内容中自然链接到相关内容页（内链），增强主题关联性
+- 包含明确的行动号召（CTA），引导用户完成转化或继续浏览
+- 避免"孤岛页面"——每个内容页至少被 2–3 个其他页面链接
+</Accordion>
+
+## 网站结构规划流程
+
+<Steps>
+  <Step title="列出所有内容类型">
+    在建站之前，先把你计划发布的所有内容类型写下来。例如：博客文章、案例研究、产品页面、落地页、FAQ、关于页、联系页。不必追求完整，日后可以补充，但要有一个初始框架。
+  </Step>
+  <Step title="对内容进行分组">
+    将内容类型归入若干主题分类。每个分类对应一个分类页。分类数量建议控制在 3–7 个，过多会分散权重，过少则导航层级不清晰。
+  </Step>
+  <Step title="设计 URL 结构">
+    根据内容分组，确定 URL 命名规则：
+
+    ```
+    /[分类]/[内容页]
+    ```
+
+    例如：`/seo/keyword-research`、`/ads/facebook-targeting`。在正式发布前确定规则，日后修改 URL 需要做重定向，成本较高。
+  </Step>
+  <Step title="规划导航菜单">
+    主导航只放最重要的 4–6 个入口。不是每个分类都需要出现在主导航中——优先级低的分类可以放在页脚导航或通过内链访问。
+  </Step>
+  <Step title="绘制内链地图">
+    在草稿阶段就规划好关键页面之间的内链关系。哪些内容页应该链接到哪个分类页？哪些内容页之间有强关联？提前规划能避免内容孤岛。
+  </Step>
+  <Step title="配置 Sitemap 和 robots.txt">
+    网站上线前，生成 XML Sitemap 并提交给 Google Search Console 和百度搜索资源平台。同时配置 robots.txt，屏蔽不需要被索引的页面（如登录页、后台管理页）。
+  </Step>
+</Steps>
+
+## 导航设计要点
+
+<CardGroup cols={2}>
+  <Card title="主导航" icon="bars">
+    - 控制在 4–6 个顶级入口
+    - 标签文字直接使用用户会搜索的词，而不是内部术语
+    - 移动端确保点击区域足够大（至少 44×44px）
+    - 当前页面在导航中应有视觉高亮
+  </Card>
+  <Card title="面包屑导航" icon="angles-right">
+    - 格式：首页 › 分类页 › 当前页
+    - 对 SEO 友好，帮助搜索引擎理解页面层级
+    - 让用户随时知道自己在网站的哪个位置
+    - 在分类页和内容页上都应显示
+  </Card>
+  <Card title="内链策略" icon="link">
+    - 每篇内容页在正文中自然链接 3–5 个相关页面
+    - 锚文本使用描述性关键词，避免"点击这里"
+    - 优先链接权重较高的分类页或核心内容页
+    - 定期检查并更新失效链接
+  </Card>
+  <Card title="页脚导航" icon="down-to-bracket">
+    - 放置次要但重要的链接：隐私政策、联系方式、关于页
+    - 可以放置主导航未能覆盖的次级分类
+    - 避免把所有页面都堆入页脚（对 SEO 无益）
+  </Card>
+</CardGroup>
+
+## Sitemap 和 robots.txt 配置
+
+### sitemap.xml 示例结构
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- 首页 -->
+  <url>
+    <loc>https://yourdomain.com/</loc>
+    <lastmod>2024-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 分类页 -->
+  <url>
+    <loc>https://yourdomain.com/seo/</loc>
+    <lastmod>2024-01-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 内容页 -->
+  <url>
+    <loc>https://yourdomain.com/seo/keyword-research</loc>
+    <lastmod>2024-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://yourdomain.com/seo/on-page-optimization</loc>
+    <lastmod>2024-01-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
+```
+
+### robots.txt 基本配置
+
+```
+User-agent: *
+Allow: /
+
+# 屏蔽后台和登录页面
+Disallow: /admin/
+Disallow: /login/
+Disallow: /wp-admin/
+
+# 告知爬虫 Sitemap 位置
+Sitemap: https://yourdomain.com/sitemap.xml
+```
+
+<Tip>
+大多数现代 CMS（WordPress、Ghost、Webflow）会自动生成 sitemap.xml。安装 SEO 插件（如 Yoast SEO 或 Rank Math）后可以更精细地控制哪些页面被收录、每个页面的优先级。
+</Tip>
+
+## 移动端优先的结构考量
+
+Google 从 2019 年起全面转向移动优先索引（Mobile-First Indexing），意味着搜索引擎主要用移动版页面评估你的网站质量。
+
+<Warning>
+如果你的移动端和桌面端内容不一致——例如移动端为了简洁隐藏了大量正文内容——搜索引擎会以移动端内容为准，那些被隐藏的文字对 SEO 几乎没有帮助。**确保核心内容在移动端完整呈现**，而不是被折叠或截断。
+</Warning>
+
+移动端结构的几个具体考量：
+
+- **导航**：汉堡菜单（☰）是移动端主流方案，但确保展开后层级不超过 2 层
+- **点击目标**：按钮和链接的点击区域至少 44×44 像素，避免用户误点
+- **页面加载速度**：移动端用户对速度更敏感，结构复杂的页面往往加载更慢；精简不必要的模块
+- **内容优先级**：在小屏幕上，最重要的内容必须在"首屏"（无需滚动即可看到）展示
+
+<Note>
+用 Google 的 [PageSpeed Insights](https://pagespeed.web.dev/) 测试你的移动端得分，重点关注"核心网页指标"（Core Web Vitals）中的 LCP（最大内容绘制）和 CLS（累积布局偏移）两项指标，这两项对 SEO 排名有直接影响。
+</Note>

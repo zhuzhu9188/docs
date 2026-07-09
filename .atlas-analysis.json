@@ -1,24 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
+  "projectType": "general",
+  "projectName": "网站建设与投放心得",
+  "projectDescription": "个人分享网站建设、SEO优化、广告投放及流量运营的实战经验与方法论。",
   "theme": "almond",
-  "name": "网站建设与投放心得",
-  "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
-  },
-  "favicon": "/favicon.svg",
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "primary": {
-      "type": "button",
-      "label": "开始阅读",
-      "href": "/introduction"
-    }
-  },
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
   "navigation": {
     "tabs": [
       {
@@ -103,7 +90,15 @@
       }
     ]
   },
-  "footer": {
-    "socials": {}
-  }
+  "keyFeatures": [
+    "域名与主机选购指南",
+    "建站平台对比与选择",
+    "SEO基础与进阶优化",
+    "Google Ads与社交广告投放",
+    "流量分析与转化优化",
+    "内容营销与邮件营销",
+    "常见误区与排错指南",
+    "实用工具与资源推荐"
+  ],
+  "publicApiSurface": []
 }

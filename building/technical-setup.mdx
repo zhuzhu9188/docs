@@ -1,0 +1,228 @@
+---
+title: 建站技术配置：SSL、CDN 与性能优化必做清单
+sidebarTitle: 技术配置
+description: 从 HTTPS 证书、Cloudflare CDN 到 GA4 安装、页面速度优化与安全加固，一份涵盖网站上线后所有关键技术配置的实操清单，逐项核对不遗漏。
+---
+
+网站设计做完、内容也写好了，但技术配置没到位，一切都是白搭——没有 HTTPS 的网站会被浏览器标记为"不安全"，没有 CDN 的国内访问速度可能慢得让用户直接关掉，没有 Analytics 你根本不知道谁在访问你的网站。本文按照优先级整理了一份完整的技术配置清单，新站上线前逐项过一遍。
+
+## 第一步：HTTPS / SSL 配置
+
+<Steps>
+  <Step title="选择 SSL 证书方案">
+    目前最常用的两种免费方案：
+
+    - **Let's Encrypt**：大多数主流虚拟主机（SiteGround、Bluehost、Kinsta）都在控制面板提供一键安装 Let's Encrypt 证书，证书有效期 90 天，支持自动续期。
+    - **Cloudflare SSL**：如果你已经把域名 DNS 接入 Cloudflare，可以直接在 Cloudflare 控制台开启 SSL/TLS，选择"Full (strict)"模式，既有 CDN 加速又有 HTTPS，是更推荐的方案。
+
+    <Warning>
+      Cloudflare SSL 有四种模式：Off、Flexible、Full、Full (strict)。**不要使用 Flexible 模式**——它只加密用户到 Cloudflare 之间的流量，Cloudflare 到你服务器之间仍然是 HTTP，存在安全风险，并且部分情况下会导致重定向循环。始终选择 **Full (strict)**。
+    </Warning>
+  </Step>
+
+  <Step title="在主机控制面板安装证书">
+    以 cPanel 为例：进入 **cPanel → SSL/TLS → Let's Encrypt**，选择你的域名（同时勾选 www 和非 www 版本），点击安装。安装完成后，访问 `https://你的域名.com` 验证浏览器地址栏是否显示锁形图标。
+  </Step>
+
+  <Step title="配置 HTTP 强制跳转 HTTPS">
+    证书安装后，还需要确保所有 HTTP 流量自动跳转到 HTTPS。在 WordPress 中可通过 Really Simple SSL 插件一键完成；如果你能直接编辑服务器配置，在 `.htaccess` 中添加以下规则：
+
+    ```apache
+    # 强制 HTTP 跳转到 HTTPS（Apache .htaccess）
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    ```
+  </Step>
+
+  <Step title="验证证书状态">
+    用 [SSL Labs](https://www.ssllabs.com/ssltest/) 测试你的域名，目标评分是 **A 或 A+**。如果低于 A，通常是 TLS 版本过旧或密码套件配置有问题，联系主机客服处理。
+  </Step>
+</Steps>
+
+## 第二步：Cloudflare CDN 配置
+
+Cloudflare 免费版提供 CDN 加速、DDoS 防护、SSL 证书三合一，是个人站长性价比最高的选择。
+
+**接入步骤：**
+
+1. 在 [Cloudflare](https://cloudflare.com) 注册账号，添加你的域名
+2. Cloudflare 会自动扫描现有 DNS 记录，确认无误后继续
+3. 将域名的 **Nameserver（NS 记录）** 修改为 Cloudflare 提供的两个地址（在你的域名注册商后台修改）
+4. 等待 NS 生效（通常 5 分钟到 24 小时）
+
+**Cloudflare 免费版必开设置：**
+
+| 设置项 | 位置 | 推荐配置 |
+|--------|------|---------|
+| SSL/TLS 加密模式 | SSL/TLS → Overview | Full (strict) |
+| 始终使用 HTTPS | SSL/TLS → Edge Certificates | 开启 |
+| 自动 HTTPS 重写 | SSL/TLS → Edge Certificates | 开启 |
+| Brotli 压缩 | Speed → Optimization | 开启 |
+| Browser Cache TTL | Caching → Configuration | 4 小时 |
+| Bot Fight Mode | Security → Bots | 开启 |
+
+<Note>
+  Cloudflare 的橙色云朵图标（Proxied）表示流量经过 Cloudflare 中转，享有 CDN 和安全保护；灰色云朵（DNS Only）表示只做 DNS 解析，不经过 Cloudflare。你的主域名 A 记录和 www CNAME 记录都应该保持**橙色**。
+</Note>
+
+## 第三步：安装 Google Analytics 4
+
+**方法一：直接在页面 `<head>` 中插入代码片段**
+
+在 GA4 控制台创建媒体资源后，你会得到一个以 `G-` 开头的衡量 ID。将以下代码插入每个页面的 `<head>` 标签内：
+
+```html
+<!-- Google Analytics 4 安装代码 -->
+<!-- 将 G-XXXXXXXXXX 替换为你的实际衡量 ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+```
+
+**方法二：通过 Google Tag Manager（GTM）安装（推荐）**
+
+GTM 是更灵活的方案，以后添加其他跟踪代码（Facebook Pixel、热力图等）都不需要再改代码：
+
+```html
+<!-- GTM 代码片段 1：放在 <head> 尽量靠前的位置 -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+
+<!-- GTM 代码片段 2：放在 <body> 开始标签之后 -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+```
+
+**验证安装是否成功：** 安装代码后，打开 GA4 控制台 → 报告 → 实时，同时用另一个浏览器访问你的网站。如果实时报告中出现活跃用户数，说明安装成功。
+
+<Tip>
+  在 Chrome 中安装 **Google Tag Assistant** 扩展，可以实时检测页面上所有 Google 标签的运行状态，快速排查安装问题。
+</Tip>
+
+## 第四步：Google Search Console 配置
+
+1. 访问 [search.google.com/search-console](https://search.google.com/search-console)，添加你的域名
+2. 选择 **"域"类型**（而不是"网址前缀"），它会同时覆盖 www 和非 www、HTTP 和 HTTPS
+3. 通过 DNS TXT 记录验证所有权（在 Cloudflare 或域名注册商 DNS 设置里添加）
+4. 验证成功后，提交你的 Sitemap：
+
+```
+https://你的域名.com/sitemap.xml
+```
+
+WordPress 用户安装 Yoast SEO 或 Rank Math 后会自动生成 Sitemap。Webflow 和 Squarespace 也会自动生成。
+
+## 第五步：301 重定向配置
+
+统一 URL 格式是 SEO 基础工作之一，避免搜索引擎将同一内容的不同 URL 版本视为重复内容。
+
+```apache
+# .htaccess 重定向规则示例（Apache 服务器）
+
+# 1. 强制非 www 跳转到 www（选其中一种）
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+
+# 或者：强制 www 跳转到非 www
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# 2. 强制 HTTP 跳转到 HTTPS（如果未使用 Cloudflare）
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 3. 单个页面的 301 永久重定向（旧 URL → 新 URL）
+Redirect 301 /old-page-url/ https://www.你的域名.com/new-page-url/
+```
+
+<Warning>
+  `www` 和非 `www` 版本必须二选一并保持一致。混用会导致 Google 将两个版本的权重分散，影响排名。在 Google Search Console 中通过"首选域名"设置告知 Google 你的标准版本，并确保 .htaccess 重定向与之一致。
+</Warning>
+
+## 第六步：页面速度优化清单
+
+<CardGroup cols={2}>
+  <Card title="图片优化" icon="image">
+    - 所有图片转换为 WebP 格式
+    - 使用 `loading="lazy"` 属性开启懒加载
+    - 通过 `width` 和 `height` 属性预定义尺寸，避免布局偏移（CLS）
+    - 首屏主图使用 `fetchpriority="high"` 优先加载
+  </Card>
+  <Card title="代码压缩" icon="file-code">
+    - 启用 CSS、JavaScript、HTML 的 Gzip 或 Brotli 压缩
+    - 合并多个 CSS/JS 文件减少 HTTP 请求数
+    - 移除未使用的 CSS（WordPress 可用 Asset CleanUp 插件）
+    - 推迟加载非关键 JavaScript（`defer` 或 `async` 属性）
+  </Card>
+  <Card title="缓存配置" icon="clock">
+    - 开启浏览器缓存，静态资源设置 Cache-Control 为 1 年
+    - WordPress 用户安装 WP Super Cache 或 W3 Total Cache
+    - Cloudflare 用户在 Cache Rules 中对静态资源设置更长的缓存时间
+  </Card>
+  <Card title="服务器优化" icon="server">
+    - 开启 HTTP/2 或 HTTP/3（大多数现代主机默认支持）
+    - 使用离用户最近的服务器节点（选择对应地区的 CDN PoP）
+    - 数据库查询优化：WordPress 定期清理修订版本和过期 Transient
+  </Card>
+</CardGroup>
+
+## 第七步：安全基础配置
+
+<Warning>
+  以下安全措施是最低限度的基础配置，忽视其中任何一项都可能导致网站被黑、数据丢失或服务中断。特别是 WordPress 站点，是攻击者的高频目标。
+</Warning>
+
+**WordPress 安全清单：**
+
+- **修改默认登录 URL**：将 `/wp-admin` 改为自定义路径（用 WPS Hide Login 插件）
+- **开启双因素验证（2FA）**：为所有管理员账户强制开启 2FA
+- **限制登录尝试次数**：安装 Limit Login Attempts Reloaded，防止暴力破解
+- **安装 Web 应用防火墙（WAF）**：Wordfence 免费版或 Cloudflare WAF（免费版已覆盖基础规则）
+- **定期备份**：每日自动备份到云存储（UpdraftPlus + Google Drive/Dropbox），保留至少 30 天备份历史
+- **及时更新**：WordPress 核心、主题、插件有更新就及时升级，这是防止攻击的最有效手段
+
+**Cloudflare 安全加固：**
+
+```
+Security → Settings：
+- Security Level → Medium
+- Browser Integrity Check → On
+
+Security → WAF：
+- Managed Rules → Cloudflare Managed Ruleset → Deploy（免费版可用）
+
+Security → Bots：
+- Bot Fight Mode → On
+```
+
+<Note>
+  备份是所有安全措施中最后一道防线，也是最常被忽视的一道。无论你的防护做得多好，都要假设"某天网站会出问题"，确保你有一份干净的备份可以快速恢复。建议遵循 **3-2-1 备份原则**：3 份备份，存储在 2 种不同介质上，其中 1 份在异地（云存储）。
+</Note>
+
+## 上线前技术配置核对清单
+
+| 配置项 | 优先级 | 状态 |
+|--------|--------|------|
+| HTTPS/SSL 已启用，锁形图标正常显示 | 🔴 必须 | ☐ |
+| HTTP 强制跳转 HTTPS 已配置 | 🔴 必须 | ☐ |
+| www / 非 www 统一并设置 301 重定向 | 🔴 必须 | ☐ |
+| Google Analytics 4 安装并验证 | 🔴 必须 | ☐ |
+| Google Search Console 验证并提交 Sitemap | 🔴 必须 | ☐ |
+| Cloudflare CDN 已接入并开启 Full (strict) SSL | 🟡 强烈推荐 | ☐ |
+| PageSpeed Insights 移动端分数 ≥ 70 | 🟡 强烈推荐 | ☐ |
+| 图片全部使用 WebP 格式 | 🟡 强烈推荐 | ☐ |
+| 自动备份已配置（每日，保留 30 天） | 🟡 强烈推荐 | ☐ |
+| 登录保护（限制尝试次数 + 2FA）已启用 | 🟡 强烈推荐 | ☐ |
+| WAF 防火墙已启用 | 🟢 建议 | ☐ |
+| SSL Labs 评分 A 或 A+ | 🟢 建议 | ☐ |

@@ -1,0 +1,195 @@
+---
+title: 网站数据追踪配置：GA4 与 Google Tag Manager 完整指南
+sidebarTitle: 追踪配置
+description: 从零开始配置 GA4 和 Google Tag Manager，掌握容器、标签、触发器的核心概念，正确埋点转化事件，让每一条数据都成为优化决策的依据。
+---
+
+数据追踪是一切优化工作的地基。没有准确的数据，你对网站的判断就只是直觉——有时候直觉是对的，但你永远无法复制成功、找到瓶颈。从 2023 年 7 月起，Google 已全面切换到 GA4，Universal Analytics 的历史数据也不再更新。如果你的网站还没有完整的追踪体系，现在是建立它的最佳时机。
+
+## 为什么数据追踪是优化的前提
+
+想象你在投放广告，每天花 500 元，却不知道哪个关键词带来了成交、哪个落地页让用户直接离开。追踪配置解决的正是这个问题——它把用户行为翻译成你能读懂的数字，告诉你钱花在哪里值得、哪里在浪费。
+
+一套完整的追踪体系通常包括三个层面：**流量来源追踪**（用户从哪里来）、**行为追踪**（用户在网站上做了什么）、**转化追踪**（用户完成了什么目标动作）。
+
+## GA4 vs Universal Analytics
+
+GA4（Google Analytics 4）是 Google 现在的标准分析平台，和旧版 Universal Analytics（UA）有几个关键区别：
+
+<CardGroup cols={2}>
+  <Card title="Universal Analytics（旧版）" icon="clock-rotate-left">
+    - 以"会话"为核心度量单位
+    - 使用"跳出率"衡量参与度
+    - Hit 类型固定（页面浏览、事件、电商）
+    - 已于 2023 年 7 月停止收集数据
+  </Card>
+  <Card title="GA4（现行标准）" icon="chart-line">
+    - 以"事件"为核心度量单位
+    - 使用"参与会话率"替代跳出率
+    - 所有交互均为事件，灵活扩展
+    - 内置 BigQuery 导出，数据归你所有
+  </Card>
+</CardGroup>
+
+<Note>
+如果你的旧网站还在使用 UA 追踪代码（`UA-XXXXXXXX-X` 格式的测量 ID），需要新建 GA4 属性并重新部署追踪代码。两套代码可以并行运行一段时间，方便历史数据对比。
+</Note>
+
+## GA4 安装方式
+
+<Tabs>
+  <Tab title="直接添加代码片段">
+    适合没有使用标签管理器、网站结构简单的情况。进入 GA4 管理后台 → 数据流 → 找到你的网站数据流 → 复制全局网站代码（gtag.js）。
+
+    将以下代码添加到网站每个页面的 `<head>` 标签内，把 `G-XXXXXXXXXX` 替换为你自己的测量 ID：
+
+    ```html GA4 直接安装代码片段
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    ```
+
+    <Tip>
+      如果你使用 WordPress，可以安装"Site Kit by Google"插件，它会自动在所有页面插入这段代码，无需手动编辑主题文件。
+    </Tip>
+  </Tab>
+  <Tab title="通过 GTM 安装（推荐）">
+    通过 Google Tag Manager 安装是更专业的方式。你只需要在网站中安装一次 GTM 代码，之后所有 GA4 事件、广告转化代码、再营销代码都可以通过 GTM 界面管理，完全不需要改动网站代码。
+
+    GTM 的安装代码分为两部分：
+
+    ```html GTM 容器代码（Head 部分）
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXXX');</script>
+    <!-- End Google Tag Manager -->
+    ```
+
+    ```html GTM 容器代码（Body 部分，紧跟 <body> 标签后）
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    ```
+
+    把两段代码中的 `GTM-XXXXXXXX` 替换为你的 GTM 容器 ID。
+  </Tab>
+</Tabs>
+
+## Google Tag Manager 核心概念
+
+GTM 的逻辑结构初看复杂，但掌握四个核心概念之后就会非常清晰：
+
+<Accordion title="容器（Container）">
+容器是 GTM 的最顶层单位，对应一个网站或应用。你在 GTM 里创建的所有配置都存在于某个容器内。每个容器有唯一的容器 ID（如 `GTM-XXXXXXXX`），这就是你嵌入网站的那段代码里的 ID。
+</Accordion>
+
+<Accordion title="标签（Tag）">
+标签是你想要在网站上执行的代码，比如"发送一个页面浏览事件到 GA4"或者"触发 Google Ads 的转化追踪"。GTM 提供了大量内置标签模板，大多数情况下你不需要写任何代码。
+</Accordion>
+
+<Accordion title="触发器（Trigger）">
+触发器定义了标签在什么条件下执行。常见触发器包括：页面加载完成时、用户点击某个按钮时、表单提交成功时、用户滚动到页面 50% 时。触发器是连接用户行为和代码执行的桥梁。
+</Accordion>
+
+<Accordion title="变量（Variable）">
+变量是动态值，在触发器或标签中使用。例如，"当前页面 URL"、"被点击元素的文本内容"、"数据层中的订单金额"都是变量。变量让你的追踪配置更灵活，能追踪具体的内容，而不只是"有点击发生"这样笼统的信息。
+</Accordion>
+
+<Note>
+**数据层（Data Layer）基础**：数据层（`window.dataLayer`）是一个 JavaScript 数组，用来在网站代码和 GTM 之间传递信息。当用户完成一笔订单，你的网站代码可以把订单金额、商品列表等信息推送到数据层，GTM 再把这些数据发送给 GA4。这是实现电商追踪的核心机制。
+
+```javascript
+// 在订单完成页面推送购买事件到数据层
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({
+  event: 'purchase',
+  ecommerce: {
+    transaction_id: 'T-12345',
+    value: 299.00,
+    currency: 'CNY',
+    items: [{
+      item_name: '年度会员套餐',
+      price: 299.00,
+      quantity: 1
+    }]
+  }
+});
+```
+</Note>
+
+## 通过 GTM 部署 GA4
+
+在 GTM 里部署 GA4 分两步：先配置 GA4 配置标签，再配置各类事件标签。
+
+<Steps>
+  <Step title="创建 GA4 配置标签">
+    在 GTM 容器内点击"新建标签"，选择标签类型"Google Analytics：GA4 配置"。输入你的 GA4 测量 ID（`G-XXXXXXXXXX`）。触发器选择"All Pages（所有页面）"。保存并命名为"GA4 - 配置"。
+  </Step>
+  <Step title="开启增强型测量">
+    回到 GA4 后台 → 数据流 → 选择你的网站 → 开启"增强型测量"。这会自动追踪页面浏览、滚动深度、外链点击、站内搜索、视频互动和文件下载，无需额外配置事件标签。
+  </Step>
+  <Step title="配置自定义事件标签">
+    对于增强型测量覆盖不到的行为（如表单提交确认、按钮点击），新建"Google Analytics：GA4 事件"类型的标签，设置事件名称，并配置相应的触发器。
+  </Step>
+  <Step title="预览和调试">
+    点击 GTM 右上角"预览"按钮进入调试模式，在新标签页中打开你的网站，GTM 调试面板会实时显示触发了哪些标签、哪些触发器被激活。确认无误后回到 GTM 点击"提交"发布版本。
+  </Step>
+</Steps>
+
+## 转化事件配置
+
+GA4 把事件分为三类：自动收集事件、增强型测量事件、和你需要手动配置的推荐事件与自定义事件。对业务最关键的是以下几个推荐事件：
+
+<CardGroup cols={3}>
+  <Card title="purchase" icon="cart-shopping">
+    电商购买完成事件，需传入 `transaction_id`、`value`、`currency` 和 `items` 参数。这是电商网站最重要的转化事件。
+  </Card>
+  <Card title="generate_lead" icon="user-plus">
+    潜在客户获取事件，适用于表单提交、咨询请求、免费试用注册等场景。建议传入 `value` 参数评估线索价值。
+  </Card>
+  <Card title="sign_up" icon="id-card">
+    用户注册事件，记录新用户注册完成的动作。可通过 `method` 参数区分注册方式（邮箱、微信、手机号等）。
+  </Card>
+</CardGroup>
+
+在 GA4 后台，进入"配置 → 事件"，找到你关心的事件，开启"标记为转化"开关，该事件就会出现在转化报告中。
+
+## 关联 Google Search Console
+
+将 GA4 与 Search Console 关联后，你可以在 GA4 中直接查看带来流量的搜索关键词数据，不需要反复切换平台。
+
+操作路径：GA4 后台 → 管理 → 产品关联 → Search Console 关联 → 选择已验证的 Search Console 属性 → 确认关联。
+
+关联完成后，在 GA4 报告侧边栏的"搜索引擎优化"板块下即可看到查询词、展示次数、点击率等数据。
+
+## 用 DebugView 验证追踪
+
+配置完成后，在正式上线之前一定要验证数据是否正确流入 GA4。
+
+<Steps>
+  <Step title="开启调试模式">
+    安装 Chrome 扩展"Google Analytics Debugger"并启用，或者在 GTM 中开启预览模式。两种方式都会在你浏览网站时激活调试模式。
+  </Step>
+  <Step title="打开 DebugView">
+    在 GA4 后台进入"配置 → DebugView"。这个界面会实时显示过去 30 分钟内调试设备触发的所有事件，事件参数一目了然。
+  </Step>
+  <Step title="逐项验证关键事件">
+    依次触发你配置的每个转化事件——填写并提交表单、完成一笔测试订单——在 DebugView 中确认事件名称正确、参数数值准确（尤其是金额、货币代码、交易 ID）。
+  </Step>
+</Steps>
+
+<Warning>
+**不要用真实订单测试电商追踪。** 在测试环境中使用折扣码将订单金额设为 0，或者在代码中添加判断逻辑，只在特定测试账号操作时触发数据层推送。如果用真实订单测试，会污染你的转化数据，导致日后报告数字不准确。
+</Warning>
+
+追踪配置是一次性投入、长期受益的基础建设。花几小时把这套体系建好，你之后做的每一个优化决策都会有数据支撑，而不是凭感觉猜测。
