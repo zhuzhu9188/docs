@@ -1,7 +1,7 @@
 ---
-title: 建站技术配置：SSL、CDN 与性能优化必做清单
+title: 建站技术配置完整清单：HTTPS、Cloudflare CDN、Analytics 与安全加固全攻略
 sidebarTitle: 技术配置
-description: 从 HTTPS 证书、Cloudflare CDN 到 GA4 安装、页面速度优化与安全加固，一份涵盖网站上线后所有关键技术配置的实操清单，逐项核对不遗漏。
+description: 从 HTTPS 证书申请、Cloudflare CDN 接入，到 Google Analytics 4 与 Search Console 安装配置、301 重定向设置、页面速度优化和 WordPress 安全加固，涵盖网站上线前所有关键技术步骤，逐项核对确保不遗漏。
 ---
 
 网站设计做完、内容也写好了，但技术配置没到位，一切都是白搭——没有 HTTPS 的网站会被浏览器标记为"不安全"，没有 CDN 的国内访问速度可能慢得让用户直接关掉，没有 Analytics 你根本不知道谁在访问你的网站。本文按照优先级整理了一份完整的技术配置清单，新站上线前逐项过一遍。
@@ -115,7 +115,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 3. 通过 DNS TXT 记录验证所有权（在 Cloudflare 或域名注册商 DNS 设置里添加）
 4. 验证成功后，提交你的 Sitemap：
 
-```
+```text
 https://你的域名.com/sitemap.xml
 ```
 
@@ -194,7 +194,7 @@ Redirect 301 /old-page-url/ https://www.你的域名.com/new-page-url/
 
 **Cloudflare 安全加固：**
 
-```
+```text
 Security → Settings：
 - Security Level → Medium
 - Browser Integrity Check → On
